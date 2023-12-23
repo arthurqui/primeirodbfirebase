@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Integration</title>
+  <!-- Inclua o SDK do Firebase (versão modular) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
+    import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js';
+
+    // Cole suas credenciais do Firebase aqui
+    var firebaseConfig = {
+      apiKey: "AIzaSyC41KIa9wdb3Vevjwno89SNt4U0vsPIaMo",
+      authDomain: "bdkdb-e8ee5.firebaseapp.com",
+      databaseURL: "https://bdkdb-e8ee5-default-rtdb.firebaseio.com",
+      projectId: "bdkdb-e8ee5",
+      storageBucket: "bdkdb-e8ee5.appspot.com",
+      messagingSenderId: "SEU_SENDER_ID",
+      appId: "SEU_APP_ID"
+    };
+
+    // Inicialize o Firebase
+    const firebaseApp = initializeApp(firebaseConfig);
+
+    // Obtém uma referência para o nó 'valor' no banco de dados
+    const database = getDatabase(firebaseApp);
+    const valorRef = ref(database, 'valor');
+
+    // Atualiza a página quando o valor no banco de dados é alterado
+    onValue(valorRef, (snapshot) => {
+      // Obtém o valor do snapshot e exibe no elemento com id 'valor'
+      document.getElementById('valor').innerText = snapshot.val();
+    });
+
+    // Defina a função incrementarValor no escopo global
+    window.incrementarValor = function() {
+      // Obtém o valor atual no banco de dados
+      const valorAtual = document.getElementById('valor').innerText;
+
+      // Incrementa o valor
+      const novoValor = parseInt(valorAtual) + 1;
+
+      // Atualiza o valor no banco de dados
+      set(valorRef, novoValor);
+    };
+  </script>
+</head>
+<body>
+  <h1>Valor no Firebase:</h1>
+  <p id="valor">Aguarde...</p>
+  <!-- Botão para incrementar o valor -->
+  <button id="incrementarBotao" onclick="incrementarValor()">Incrementar</button>
+</body>
+</html>
