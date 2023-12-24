@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Integration</title>
+  <!-- Inclua o SDK do Firebase (versão modular) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
+    import { getDatabase, ref, push, get, query, orderByChild, equalTo } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
+
+    // Cole suas credenciais do Firebase aqui
+    var firebaseConfig = {
+      apiKey: "AIzaSyC41KIa9wdb3Vevjwno89SNt4U0vsPIaMo",
+      authDomain: "bdkdb-e8ee5.firebaseapp.com",
+      databaseURL: "https://bdkdb-e8ee5-default-rtdb.firebaseio.com",
+      projectId: "bdkdb-e8ee5",
+      storageBucket: "bdkdb-e8ee5.appspot.com",
+      messagingSenderId: "SEU_SENDER_ID",
+      appId: "SEU_APP_ID"
+    };
+
+    // Inicialize o Firebase
+    const firebaseApp = initializeApp(firebaseConfig);
+
+    // Obtém uma referência para o nó 'cadastros' no banco de dados
+    const database = getDatabase(firebaseApp);
+    const cadastrosRef = ref(database, 'cadastros');
+
+    // Defina a função cadastrar no escopo global
+    window.cadastrar = async function() {
+      // Obtém os valores digitados pelo usuário
+      const login = document.getElementById('login').value;
+      const senha = document.getElementById('senha').value;
+      const nome = document.getElementById('nome').value;
+      const linkSteam = document.getElementById('linkSteam').value;
+
+      // Verifica se pelo menos um campo está vazio
+      if (login.trim() === '' || senha.trim() === '' || nome.trim() === '' || linkSteam.trim() === '') {
+        // Se pelo menos um campo estiver vazio, exibe uma mensagem de aviso
+        alert('Erro: Preencha todos os campos antes de cadastrar.');
+        return;
+      }
+
+      // Verifica se o login já existe no banco
+      const loginExists = await checkIfFieldExists('login', login);
+      if (loginExists) {
+        alert('Erro: Este login já está em uso.');
+        return;
+      }
+
+      // Verifica se o linkSteam já existe no banco
+      const linkSteamExists = await checkIfFieldExists('linkSteam', linkSteam);
+      if (linkSteamExists) {
+        alert('Erro: Este link Steam já está em uso.');
+        return;
+      }
+
+      // Cria um objeto com os dados do cadastro
+      const novoCadastro = {
+        login: login,
+        senha: senha,
+        nome: nome,
+        linkSteam: linkSteam
+      };
+
+      // Adiciona o novo cadastro ao banco de dados usando push para criar uma nova chave
+      push(cadastrosRef, novoCadastro);
+
+      // Limpa os campos de texto
+      document.getElementById('login').value = '';
+      document.getElementById('senha').value = '';
+      document.getElementById('nome').value = '';
+      document.getElementById('linkSteam').value = '';
+    };
+
+    // Função para verificar se um campo específico já existe no banco
+    async function checkIfFieldExists(fieldName, value) {
+      const q = query(cadastrosRef, orderByChild(fieldName), equalTo(value));
+      const snapshot = await get(q);
+      return snapshot.exists();
+    }
+  </script>
+</head>
+<body>
+  <!-- Campos de texto para adicionar novo cadastro -->
+  <label for="login">Login:</label>
+  <input type="text" id="login" placeholder="Digite o login">
+
+  <label for="senha">Senha:</label>
+  <input type="password" id="senha" placeholder="Digite a senha">
+
+  <label for="nome">Nome:</label>
+  <input type="text" id="nome" placeholder="Digite o nome">
+
+  <label for="linkSteam">Link Steam:</label>
+  <input type="text" id="linkSteam" placeholder="Digite o link Steam">
+
+  <!-- Botão para cadastrar novo valor -->
+  <button id="cadastrarBotao" onclick="cadastrar()">Cadastrar</button>
+</body>
+</html>

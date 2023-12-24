@@ -29,26 +29,6 @@
     // Verifica se o usuário está autenticado
     const isAuthenticated = localStorage.getItem('authenticated') === 'true';
 
-    // Função para obter dados do usuário do banco de dados
-    async function getUserData() {
-      // Obtém o login do usuário autenticado
-      const authenticatedUserLogin = localStorage.getItem('authenticatedUserLogin');
-
-      // Verifica se o usuário está autenticado
-      if (authenticatedUserLogin) {
-        // Obtém os dados do usuário autenticado do banco de dados
-        const userSnapshot = await get(ref(database, `usuarios/${authenticatedUserLogin}`));
-
-        if (userSnapshot.exists()) {
-          // Retorna os dados do usuário
-          return userSnapshot.val();
-        }
-      }
-
-      // Retorna um objeto vazio se não encontrar dados do usuário
-      return {};
-    }
-
     // Função para exibir a tabela de cadastros
     function showTable(cadastros) {
       // Limpa o conteúdo atual da tabela
@@ -68,18 +48,8 @@
       }
     }
 
-    // Função para preencher a topbar com os dados do usuário
-    function updateTopbar(userData) {
-      const topbar = document.getElementById('topbar');
-      topbar.innerHTML = `
-        <p>Nome: ${userData.nome}</p>
-        <p>Link Steam: ${userData.linkSteam}</p>
-        <button onclick="logout()">Logout</button>
-      `;
-    }
-
     // Atualiza a página quando os cadastros no banco de dados são alterados
-    onValue(cadastrosRef, async (snapshot) => {
+    onValue(cadastrosRef, (snapshot) => {
       const cadastros = snapshot.val();
 
       // Verifica se há cadastros no banco de dados
@@ -92,12 +62,6 @@
           // Se estiver autenticado, esconde a interface de login e exibe a tabela de cadastros
           document.getElementById('loginFields').style.display = 'none';
           document.getElementById('tableContainer').style.display = 'block';
-          document.getElementById('topbar').style.display = 'block';
-          document.getElementById('emptyDiv').style.display = 'block';
-
-          // Adicione aqui o código para preencher a topbar com os dados do usuário
-          const userData = await getUserData();
-          updateTopbar(userData);
         } else {
           // Se não estiver autenticado, exibe a interface de login
           showLoginInterface();
@@ -113,8 +77,6 @@
       // Exibe campos de login e senha e botão de logar
       document.getElementById('loginFields').style.display = 'block';
       document.getElementById('tableContainer').style.display = 'none';
-      document.getElementById('topbar').style.display = 'none';
-      document.getElementById('emptyDiv').style.display = 'none';
     }
 
     // Função para realizar o login
@@ -139,15 +101,6 @@
         // Se o login for válido, esconde a interface de login e exibe a tabela de cadastros
         document.getElementById('loginFields').style.display = 'none';
         document.getElementById('tableContainer').style.display = 'block';
-        document.getElementById('topbar').style.display = 'block';
-        document.getElementById('emptyDiv').style.display = 'block';
-
-        // Atualiza o localStorage com o login do usuário autenticado
-        localStorage.setItem('authenticatedUserLogin', inputLogin);
-
-        // Adicione aqui o código para preencher a topbar com os dados do usuário
-        const userData = await getUserData();
-        updateTopbar(userData);
 
         // Armazena o estado de autenticação no localStorage
         localStorage.setItem('authenticated', 'true');
@@ -189,12 +142,6 @@
 
     <button id="loginButton" onclick="login()">Logar</button>
   </div>
-
-  <!-- Topbar -->
-  <div id="topbar" style="display: none;"></div>
-
-  <!-- Div vazia -->
-  <div id="emptyDiv" style="display: none;"></div>
 
   <!-- Tabela de cadastros -->
   <div id="tableContainer" style="display: none;">
